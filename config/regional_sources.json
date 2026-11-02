@@ -1,0 +1,98 @@
+{
+  "sources": [
+    {
+      "source_id": "mas",
+      "source_name": "Monetary Authority of Singapore",
+      "jurisdiction": "Singapore",
+      "regulator": "MAS",
+      "url": "https://www.sgpc.gov.sg/api/file/getfile/MAS%20Media%20Release_MAS%20Announces%20Plans%20to%20Support%20Commercialisation%20of%20Asset%20Tokenisation.pdf?path=%2Fsgpcmedia%2Fmedia_releases%2Fmas%2Fpress_release%2FP-20241104-2%2Fattachment%2FMAS+Media+Release_MAS+Announces+Plans+to+Support+Commercialisation+of+Asset+Tokenisation.pdf",
+      "media_type": "application/pdf",
+      "title": "MAS Announces Plans to Support Commercialisation of Asset Tokenisation",
+      "date_raw": "4 November 2024",
+      "date_format": "%d %B %Y",
+      "title_selector": null,
+      "body_selector": null,
+      "date_selector": null,
+      "source_type": "primary_regulator",
+      "enabled": true,
+      "verified_at": "2026-10-28T13:32:10Z",
+      "discovery_url": "https://www.sgpc.gov.sg/api/file/getfile/MAS%20Media%20Release_MAS%20Announces%20Plans%20to%20Support%20Commercialisation%20of%20Asset%20Tokenisation.pdf?path=%2Fsgpcmedia%2Fmedia_releases%2Fmas%2Fpress_release%2FP-20241104-2%2Fattachment%2FMAS+Media+Release_MAS+Announces+Plans+to+Support+Commercialisation+of+Asset+Tokenisation.pdf",
+      "scope": {
+        "allowed_hosts": [
+          "www.sgpc.gov.sg"
+        ]
+      },
+      "http": {
+        "user_agent": "VirtualAssetResearch/0.3 (academic regulatory pilot)",
+        "timeout_seconds": 30,
+        "max_retries": 1,
+        "min_interval_seconds": 1,
+        "max_redirects": 2,
+        "max_bytes": 10485760,
+        "trust_env": true
+      }
+    },
+    {
+      "source_id": "esma",
+      "source_name": "European Securities and Markets Authority",
+      "jurisdiction": "European Union",
+      "regulator": "ESMA",
+      "url": "https://www.esma.europa.eu/press-news/esma-news/esma-suggests-amendments-dlt-pilot-regime-make-it-permanent",
+      "media_type": "text/html",
+      "title": "ESMA suggests amendments to the DLT Pilot Regime to make it permanent",
+      "title_selector": "h1",
+      "body_selector": ".field--name-field-news-introduction, .field--name-field-news-body",
+      "date_selector": ".publication-date",
+      "date_format": "%d/%m/%Y",
+      "source_type": "primary_regulator",
+      "enabled": true,
+      "verified_at": "2026-10-28T13:32:10Z",
+      "discovery_url": "https://www.esma.europa.eu/press-news/esma-news/esma-suggests-amendments-dlt-pilot-regime-make-it-permanent",
+      "scope": {
+        "allowed_hosts": [
+          "www.esma.europa.eu"
+        ]
+      },
+      "http": {
+        "user_agent": "VirtualAssetResearch/0.3 (academic regulatory pilot)",
+        "timeout_seconds": 30,
+        "max_retries": 1,
+        "min_interval_seconds": 1,
+        "max_redirects": 2,
+        "max_bytes": 10485760,
+        "trust_env": true
+      }
+    },
+    {
+      "source_id": "fca",
+      "source_name": "Financial Conduct Authority",
+      "jurisdiction": "United Kingdom",
+      "regulator": "FCA",
+      "url": "https://www.fca.org.uk/news/press-releases/fca-seeks-further-views-stablecoins-and-crypto-custody",
+      "media_type": "text/html",
+      "title": "FCA seeks further views on stablecoins and crypto custody",
+      "title_selector": "h1",
+      "body_selector": "article section.copy-block",
+      "date_selector": "time",
+      "date_format": "%d/%m/%Y",
+      "source_type": "primary_regulator",
+      "enabled": true,
+      "verified_at": "2026-10-28T13:32:10Z",
+      "discovery_url": "https://www.fca.org.uk/news/press-releases/fca-seeks-further-views-stablecoins-and-crypto-custody",
+      "scope": {
+        "allowed_hosts": [
+          "www.fca.org.uk"
+        ]
+      },
+      "http": {
+        "user_agent": "VirtualAssetResearch/0.3 (academic regulatory pilot)",
+        "timeout_seconds": 30,
+        "max_retries": 1,
+        "min_interval_seconds": 1,
+        "max_redirects": 2,
+        "max_bytes": 10485760,
+        "trust_env": true
+      }
+    }
+  ]
+}

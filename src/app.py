@@ -1,11 +1,9 @@
 from pathlib import Path
-import json
 import pandas as pd
 import plotly.express as px
 import streamlit as st
 
 ROOT = Path(__file__).resolve().parents[1]
-DATA = ROOT / "data" / "canonical"
 
 st.set_page_config(page_title="Virtual Asset Intelligence", page_icon="◈", layout="wide")
 
@@ -27,12 +25,12 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 
-def load_jsonl(name: str) -> pd.DataFrame:
-    with (DATA / name).open(encoding="utf-8") as handle:
-        return pd.DataFrame([json.loads(line) for line in handle if line.strip()])
+from app_data import load_app_data, assessment
 
 
 def money(value: float) -> str:
+    if pd.isna(value):
+        return "Unavailable"
     if value >= 1_000_000_000_000:
         return f"${value / 1_000_000_000_000:.2f}T"
     if value >= 1_000_000_000:
@@ -42,10 +40,9 @@ def money(value: float) -> str:
     return f"${value:,.0f}"
 
 
-documents = load_jsonl("documents.jsonl")
-developments = load_jsonl("developments.jsonl")
-chunks = load_jsonl("chunks.jsonl")
-markets = pd.read_csv(DATA / "market_observations.csv")
+documents, developments, chunks, markets, data_issues = load_app_data(ROOT)
+for issue in data_issues:
+    st.warning(issue)
 
 with st.sidebar:
     st.markdown("## ◈ Signal Desk")
@@ -53,15 +50,15 @@ with st.sidebar:
     st.divider()
     page = st.radio("Workspace", ["Overview", "Regulatory Monitor", "Market Signals", "Ask the Analyst"], label_visibility="collapsed")
     st.divider()
-    st.caption("DEMO DATASET")
-    st.caption("All source records currently use illustrative example URLs. Replace them with approved connectors before relying on outputs.")
+    st.caption("REAL SOURCE DATA")
+    st.caption("Official regulatory publications and public market APIs. Analysis and review have not been performed.")
 
 st.markdown('<div class="hero"><h1>Virtual Asset Intelligence</h1><p>Cross-market regulatory signals, market indicators, and source-grounded analysis.</p></div>', unsafe_allow_html=True)
 
 if page == "Overview":
     st.markdown("### Executive snapshot")
     cols = st.columns(4)
-    metrics = [("Tracked publications", len(documents), "Across 4 pilot markets"), ("Flagged developments", len(developments), "All critic-checked"), ("Evidence chunks", len(chunks), "Citation-preserving"), ("Market indicators", len(markets), "Illustrative fixtures")]
+    metrics = [("Tracked publications", len(documents), f"Across {documents.jurisdiction.nunique() if not documents.empty else 0} collected jurisdictions"), ("Regulatory records", len(developments), "Not yet reviewed"), ("Evidence chunks", len(chunks), "Citation-preserving"), ("Market indicators", len(markets), "Public API observations")]
     for col, (label, value, note) in zip(cols, metrics):
         with col:
             st.markdown(f'<div class="metric"><div class="metric-label">{label}</div><div class="metric-value">{value}</div><div style="color:#7188a5;font-size:.8rem">{note}</div></div>', unsafe_allow_html=True)
@@ -69,24 +66,24 @@ if page == "Overview":
     left, right = st.columns([1.35, 1])
     with left:
         chart_data = developments.groupby(["jurisdiction", "risk_rating"], as_index=False).size().rename(columns={"size": "count"})
-        fig = px.bar(chart_data, x="jurisdiction", y="count", color="risk_rating", barmode="stack", color_discrete_map={"low":"#34d399", "medium":"#fbbf24", "high":"#fb7185"}, template="plotly_dark")
+        fig = px.bar(chart_data, x="jurisdiction", y="count", color="risk_rating", barmode="stack", color_discrete_map={"low":"#34d399", "medium":"#fbbf24", "high":"#fb7185", "unknown":"#94a3b8"}, template="plotly_dark")
         fig.update_layout(height=330, margin=dict(l=0,r=0,t=10,b=0), paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)", legend_title_text="Risk")
         st.plotly_chart(fig, use_container_width=True)
     with right:
         st.markdown("#### Latest signals")
         for row in developments.sort_values("confidence", ascending=False).head(4).itertuples():
-            st.markdown(f'<div class="source"><span class="badge">{row.jurisdiction} · {row.risk_rating}</span><br><b>{row.obligation_summary}</b><br><small>Confidence {row.confidence:.0%} · {row.review_status.replace("_", " ")}</small></div>', unsafe_allow_html=True)
+            st.markdown(f'<div class="source"><span class="badge">{row.jurisdiction} · {row.risk_rating}</span><br><b>{row.obligation_summary}</b><br><small>Confidence {assessment(row.confidence)} · {row.review_status.replace("_", " ")}</small></div>', unsafe_allow_html=True)
 
 elif page == "Regulatory Monitor":
     st.markdown("### Regulatory monitor")
     f1, f2, f3 = st.columns(3)
     jurisdictions = f1.multiselect("Jurisdiction", sorted(developments.jurisdiction.unique()), default=sorted(developments.jurisdiction.unique()))
-    assets = f2.multiselect("Asset class", sorted(developments.asset_class.unique()), default=sorted(developments.asset_class.unique()))
-    risks = f3.multiselect("Risk rating", ["low", "medium", "high"], default=["low", "medium", "high"])
-    filtered = developments[developments.jurisdiction.isin(jurisdictions) & developments.asset_class.isin(assets) & developments.risk_rating.isin(risks)]
+    assets = f2.multiselect("Asset class", sorted({asset for value in developments.asset_class for asset in value.split(', ')}), default=sorted({asset for value in developments.asset_class for asset in value.split(', ')}))
+    risks = f3.multiselect("Risk rating", ["low", "medium", "high", "unknown"], default=["low", "medium", "high", "unknown"])
+    filtered = developments[developments.jurisdiction.isin(jurisdictions) & developments.asset_class.map(lambda value: bool(set(value.split(', ')) & set(assets))) & developments.risk_rating.isin(risks)]
     st.caption(f"Showing {len(filtered)} of {len(developments)} developments")
     display = filtered[["jurisdiction", "regulator", "asset_class", "lifecycle_stage", "obligation_summary", "risk_rating", "confidence"]].copy()
-    display["confidence"] = display["confidence"].map(lambda x: f"{x:.0%}")
+    display["confidence"] = display["confidence"].map(assessment)
     st.dataframe(display, use_container_width=True, hide_index=True)
     selected = st.selectbox("Inspect evidence", filtered.development_id.tolist() if not filtered.empty else ["No matching records"])
     if selected != "No matching records":
@@ -98,19 +95,23 @@ elif page == "Regulatory Monitor":
 
 elif page == "Market Signals":
     st.markdown("### Market signals")
-    st.info("Illustrative fixture values only. Market observations are separate from legal/regulatory evidence.")
+    st.info("Real API observations. BTC market cap, USDC circulation (USD at peg), and the largest tracked RWA protocol TVL use different metrics; chart areas are not market shares. See source, collection time and data quality below.")
     cols = st.columns(len(markets))
     for col, row in zip(cols, markets.itertuples()):
         with col:
             st.markdown(f'<div class="metric"><div class="metric-label">{row.instrument}</div><div class="metric-value">{money(row.value)}</div><div style="color:#7188a5;font-size:.8rem">{row.metric.replace("_", " ")}</div></div>', unsafe_allow_html=True)
-    fig = px.treemap(markets, path=["asset_class", "instrument"], values="value", color="asset_class", template="plotly_dark")
-    fig.update_layout(height=460, margin=dict(l=0,r=0,t=20,b=0), paper_bgcolor="rgba(0,0,0,0)")
-    st.plotly_chart(fig, use_container_width=True)
+    chart_markets = markets[markets.value.notna() & (markets.value > 0)]
+    if not chart_markets.empty:
+        fig = px.treemap(chart_markets, path=["asset_class", "instrument"], values="value", color="asset_class", template="plotly_dark")
+        fig.update_layout(height=460, margin=dict(l=0,r=0,t=20,b=0), paper_bgcolor="rgba(0,0,0,0)")
+        st.plotly_chart(fig, use_container_width=True)
+    else:
+        st.info("No market values are available for the chart.")
     st.dataframe(markets, use_container_width=True, hide_index=True)
 
 else:
     st.markdown("### Ask the analyst")
-    st.caption("This demo uses local keyword matching over the fixture evidence. Connect an LLM provider and orchestration layer for generated answers.")
+    st.caption("Local keyword matching over real regulatory evidence. No model-generated analysis or assessment is performed.")
     question = st.text_input("Question", placeholder="e.g. What are the stablecoin reserve signals across HK and the UK?")
     if question:
         terms = set(question.lower().replace("?", "").split())
@@ -120,9 +121,9 @@ else:
             st.warning("No matching evidence found. Try a regulator, asset class, or topic such as reserve, custody, or settlement.")
         else:
             st.markdown("#### Evidence-grounded results")
-            st.write("The following source excerpts are the closest matches in the local fixture index:")
+            st.write("The following source excerpts are the closest keyword matches in the collected evidence:")
             for row in matches.itertuples():
                 st.markdown(f'<div class="source"><span class="badge">match {row.score}</span><br>{row.text}<br><small>{row.citation.label} · {row.citation.url}</small></div>', unsafe_allow_html=True)
 
 st.divider()
-st.caption("Signal Desk · File-first MVP · Source-grounded outputs · Demo fixture data")
+st.caption("Signal Desk · File-first MVP · Source-grounded outputs · Real source data")

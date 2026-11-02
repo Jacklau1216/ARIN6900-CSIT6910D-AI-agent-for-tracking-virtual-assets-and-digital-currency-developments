@@ -1,0 +1,30 @@
+{
+  "refresh_seconds": 900,
+  "failure_retry_seconds": 60,
+  "sources": [
+    {
+      "id": "defillama_stablecoins",
+      "provider": "DefiLlama",
+      "url": "https://stablecoins.llama.fi/stablecoins?includePrices=true",
+      "trust_env": false,
+      "verified_on": "2026-10-26",
+      "scope": "USD-pegged stablecoin circulating amounts and available prices"
+    },
+    {
+      "id": "coingecko_bitcoin",
+      "provider": "CoinGecko",
+      "url": "https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=bitcoin",
+      "trust_env": true,
+      "verified_on": "2026-10-26",
+      "scope": "Bitcoin market capitalization, price and 24-hour trading volume"
+    },
+    {
+      "id": "defillama_rwa",
+      "provider": "DefiLlama",
+      "url": "https://api.llama.fi/protocols",
+      "trust_env": false,
+      "verified_on": "2026-10-26",
+      "scope": "Individual protocol TVL where the provider category is RWA; no market-wide basket or aggregate"
+    }
+  ]
+}
