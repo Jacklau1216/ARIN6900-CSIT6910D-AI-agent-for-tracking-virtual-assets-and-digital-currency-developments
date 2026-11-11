@@ -2,3 +2,13 @@
 __pycache__/
 *.pyc
 .env
+
+# Runtime/generated project artifacts
+logs/
+data/raw/
+data/processed/
+data/discovery/
+data/ingestion/
+data/market/
+*.sqlite
+*.sqlite3
