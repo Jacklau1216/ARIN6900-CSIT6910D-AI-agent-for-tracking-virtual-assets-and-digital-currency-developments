@@ -180,10 +180,37 @@ Source text:
 Return JSON with:
 - executive_summary: 2-4 sentences in plain English
 - impact_tags: list of lower-case impact keywords
-- risk_rating: one of low, medium, high, critical, unknown
-- confidence: float in 0..1
+- risk_rating: one of low, medium, high, critical, unknown. Evaluate risk using
+  the evidence-grounded dimensions below; do not infer risk from document length
+  or from the presence of financial or technical terminology alone.
+- confidence: float in 0..1, reflecting the completeness and directness of the
+  supporting evidence, not how certain the model feels
 - key_findings: 3 bullet points as short strings
 - source_citations: brief references to the cited source text, if any
+
+Risk evaluation rubric:
+- legal_force: 0-30 points. Binding legislation, mandatory requirements,
+  prohibitions, penalties, or active enforcement are higher risk than proposals,
+  consultation questions, speeches, or descriptive market updates.
+- operational_burden: 0-25 points. Reserve, custody, segregation, licensing,
+  reporting, audit, disclosure, technology, or governance changes increase risk
+  when they require material implementation work.
+- scope_exposure: 0-20 points. Broad sector-wide, market-wide, systemic, or
+  cross-border effects score higher than narrow or voluntary activities.
+- enforcement_proximity: 0-15 points. An effective date, implementation
+  deadline, transition period, sanction, supervisory action, or enforcement
+  activity increases risk.
+- evidence_quality: 0-10 points. Direct, specific, current primary-source
+  evidence scores higher; ambiguous, incomplete, indirect, or contradictory
+  evidence must reduce confidence and may require an unknown rating.
+
+Use the total only as a guide: 0-24 = low, 25-49 = medium, 50-74 = high,
+75-100 = critical. Use unknown when the text does not provide enough evidence
+to assess the dimensions. In key_findings and source_citations, identify the
+specific source passage supporting each material risk factor. Clearly distinguish
+enacted requirements from proposals, consultations, guidance, and observations;
+do not describe a proposal as an obligation. This is regulatory research support,
+not legal advice.
 """
         result = _structured_prompt(prompt, ExecutiveSummary)
         analysis = result.model_dump()
