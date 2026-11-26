@@ -12,3 +12,5 @@ data/exports/
 data/market/
 logs/
 .pytest_cache/
+*.sqlite
+*.sqlite3
