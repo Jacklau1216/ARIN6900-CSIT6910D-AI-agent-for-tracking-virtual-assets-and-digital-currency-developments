@@ -1,3 +1,0 @@
-# Full app: existing Streamlit UI plus the real-document ingestion pipeline.
--r requirements.txt
--r requirements-ingestion.txt
