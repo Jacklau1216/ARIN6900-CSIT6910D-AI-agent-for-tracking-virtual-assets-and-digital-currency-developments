@@ -188,9 +188,6 @@ def refresh_document_assessments(root, data):
     return load_assessment_map(db_path)
 
 
-def regulatory_frames(data, assessments=None):
-
-
 def research_chunks(publications):
     rows = []
     for pub in publications:
@@ -210,7 +207,7 @@ def research_library(root):
     return load_publications(Path(root))
 
 
-def regulatory_frames(data):
+def regulatory_frames(data, assessments=None):
     """A publication preview is not an inferred obligation or reviewed finding."""
     chunks, developments = [], []
     by_document = {}
